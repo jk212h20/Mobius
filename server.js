@@ -59,7 +59,7 @@ function saveLeaderboard(board) {
   fs.renameSync(tmp, leaderboardFile);
 }
 function publicEntry(e) {
-  return { id: e.id, level: e.level, rank: e.rank, time: e.time, frame: e.frame, inputs: e.inputs, handle: e.handle || '', address: e.address || '', submittedAt: e.submittedAt, buildSha: e.buildSha, replayPass: true };
+  return { id: e.id, level: e.level, rank: e.rank, time: e.time, frame: e.frame, inputs: e.inputs, handle: e.handle || '', address: e.address || '', submittedAt: e.submittedAt, buildSha: e.buildSha, replayPass: true, hasReplay: !!e.run };
 }
 function rankedEntries(board, level) {
   const rows = (board.levels[level] || []).slice().sort((a, b) => a.time - b.time || a.submittedAt.localeCompare(b.submittedAt)).slice(0, 10);
@@ -78,6 +78,15 @@ const server = http.createServer(async (req, res) => {
     const board = loadLeaderboard();
     return json(res, 200, { ok: true, buildSha, level, entries: rankedEntries(board, level) });
   }
+  if (url.pathname === '/api/run' && req.method === 'GET') {
+    const level = safeLevel(url.searchParams.get('level') || 'mobius');
+    const id = sanitizeText(url.searchParams.get('id') || '', 80);
+    if (!level || !id) return json(res, 400, { ok: false, error: 'missing level/id' });
+    const board = loadLeaderboard();
+    const entry = (board.levels[level] || []).find(e => e.id === id);
+    if (!entry || !entry.run) return json(res, 404, { ok: false, error: 'replay not found' });
+    return json(res, 200, { ok: true, buildSha, entry: publicEntry(entry), run: entry.run });
+  }
   if (url.pathname === '/api/runs' && req.method === 'POST') {
     try {
       const payload = JSON.parse(await readBody(req) || '{}');
@@ -92,7 +101,8 @@ const server = http.createServer(async (req, res) => {
       const handle = sanitizeText(payload.handle || run.handle || 'ANON', 24) || 'ANON';
       const address = sanitizeText(payload.address || run.address || '', 96);
       const id = shortHash(JSON.stringify({ level, snapshot: run.snapshot, inputs: run.inputs, finished }));
-      const entry = { id, level, time: finished.time, frame: finished.frame, inputs: (run.inputs || []).length, handle, address, submittedAt: new Date().toISOString(), buildSha: run.buildSha || run.snapshot?.buildSha || buildSha };
+      const storedRun = JSON.parse(JSON.stringify(run));
+      const entry = { id, level, time: finished.time, frame: finished.frame, inputs: (run.inputs || []).length, handle, address, submittedAt: new Date().toISOString(), buildSha: run.buildSha || run.snapshot?.buildSha || buildSha, run: storedRun };
       const existing = board.levels[level].findIndex(e => e.id === id);
       if (existing >= 0) board.levels[level][existing] = { ...board.levels[level][existing], ...entry };
       else board.levels[level].push(entry);
