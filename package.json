@@ -4,7 +4,12 @@
   "private": true,
   "description": "Single-file Three.js topology/Life/racing playground.",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test:replay": "node scripts/replay-stress.js",
+    "test:persistence": "node scripts/leaderboard-persistence-test.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.60.0"
   },
   "engines": {
     "node": ">=18"
