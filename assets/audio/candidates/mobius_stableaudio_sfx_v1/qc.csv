@@ -1,0 +1,7 @@
+qc_pass,file,duration_seconds,peak_dbfs,rms_dbfs,silent_fraction,active_fraction,clipping_fraction,dc_offset,stereo_imbalance_db,spectral_available,low_energy_fraction_20_160hz,mid_energy_fraction_160_4000hz,high_energy_fraction_4k_16khz,spectral_centroid_hz,spectral_flatness,qc_reasons
+True,/Users/nick/ActiveProjects/Mobius/assets/audio/candidates/mobius_stableaudio_sfx_v1/boost_hit__sa_01_seed_43001__stable_plasma_boost.wav,2.0,-0.45,-17.51,0.5,0.5,0.0,-0.000214,0.0,False,,,,,,
+True,/Users/nick/ActiveProjects/Mobius/assets/audio/candidates/mobius_stableaudio_sfx_v1/boost_hit__sa_01_seed_43002__stable_plasma_boost.wav,2.0,-0.45,-16.38,0.25,0.75,0.0,-0.000522,0.0,False,,,,,,
+True,/Users/nick/ActiveProjects/Mobius/assets/audio/candidates/mobius_stableaudio_sfx_v1/hazard_hit__sa_02_seed_43001__electric_snap_thud.wav,2.0,-0.45,-23.33,0.45,0.55,0.0,-0.000524,0.0,False,,,,,,
+True,/Users/nick/ActiveProjects/Mobius/assets/audio/candidates/mobius_stableaudio_sfx_v1/hazard_hit__sa_02_seed_43002__electric_snap_thud.wav,2.0,-0.45,-19.09,0.15,0.85,0.0,-0.002879,0.0,False,,,,,,
+False,/Users/nick/ActiveProjects/Mobius/assets/audio/candidates/mobius_stableaudio_sfx_v1/rail_bump__sa_03_seed_43001__ceramic_spark_tick.wav,1.0,-0.45,-33.3,0.85,0.15,0.0,-4.5e-05,0.0,False,,,,,,too_much_silence>0.7
+False,/Users/nick/ActiveProjects/Mobius/assets/audio/candidates/mobius_stableaudio_sfx_v1/rail_bump__sa_03_seed_43002__ceramic_spark_tick.wav,1.0,-0.45,-32.87,0.8,0.2,0.0,-8e-05,0.0,False,,,,,,too_much_silence>0.7

@@ -1,0 +1,2 @@
+qc_pass,file,duration_seconds,peak_dbfs,rms_dbfs,silent_fraction,active_fraction,clipping_fraction,dc_offset,stereo_imbalance_db,spectral_available,low_energy_fraction_20_160hz,mid_energy_fraction_160_4000hz,high_energy_fraction_4k_16khz,spectral_centroid_hz,spectral_flatness,qc_reasons
+True,/Users/nick/ActiveProjects/Mobius/assets/audio/candidates/mobius_stableaudio_smoke_v1/boost_hit__sa_01_seed_42001__stable_plasma_boost.wav,2.0,-0.45,-15.95,0.425,0.575,0.0,-8.6e-05,0.0,False,,,,,,

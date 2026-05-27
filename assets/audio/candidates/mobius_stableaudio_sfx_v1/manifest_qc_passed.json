@@ -1,0 +1,90 @@
+{
+  "batch": "mobius_stableaudio_sfx_v1",
+  "note": "StableAudio small-sfx batch. QC filtered: 4 passed, 2 rejected for too much silence.",
+  "items": [
+    {
+      "id": "boost_hit__sa_01_seed_43001",
+      "slot": "boost_hit",
+      "variant": 1,
+      "style": "stable plasma boost",
+      "kind": "one-shot",
+      "description": "StableAudio SFX: boost pad trigger, trim best 0.4-0.9s. Prompt: short futuristic magnetic racer speed boost pickup, upward pitch sweep, clean plasma whoosh, bright electric shimmer, punchy transient, dry isolated game sound effect, no voice, no music",
+      "duration_seconds": 2.0,
+      "path": "assets/audio/candidates/mobius_stableaudio_sfx_v1/boost_hit__sa_01_seed_43001__stable_plasma_boost.wav",
+      "status": "candidate",
+      "source": "stable_audio_3:small-sfx",
+      "seed": 43001,
+      "steps": 4,
+      "cfg": 1.0,
+      "qc": {
+        "peak_dbfs": -0.45,
+        "rms_dbfs": -17.51,
+        "silent_fraction": 0.5,
+        "duration_seconds": 2.0
+      }
+    },
+    {
+      "id": "boost_hit__sa_01_seed_43002",
+      "slot": "boost_hit",
+      "variant": 1,
+      "style": "stable plasma boost",
+      "kind": "one-shot",
+      "description": "StableAudio SFX: boost pad trigger, trim best 0.4-0.9s. Prompt: short futuristic magnetic racer speed boost pickup, upward pitch sweep, clean plasma whoosh, bright electric shimmer, punchy transient, dry isolated game sound effect, no voice, no music",
+      "duration_seconds": 2.0,
+      "path": "assets/audio/candidates/mobius_stableaudio_sfx_v1/boost_hit__sa_01_seed_43002__stable_plasma_boost.wav",
+      "status": "candidate",
+      "source": "stable_audio_3:small-sfx",
+      "seed": 43002,
+      "steps": 4,
+      "cfg": 1.0,
+      "qc": {
+        "peak_dbfs": -0.45,
+        "rms_dbfs": -16.38,
+        "silent_fraction": 0.25,
+        "duration_seconds": 2.0
+      }
+    },
+    {
+      "id": "hazard_hit__sa_02_seed_43001",
+      "slot": "hazard_hit",
+      "variant": 2,
+      "style": "electric snap thud",
+      "kind": "one-shot",
+      "description": "StableAudio SFX: hazard penalty hit, trim best 0.4-1.0s. Prompt: red hazard collision in futuristic magnetic racer, electric snap into heavy low thud, dangerous but clean, dry isolated game sound effect, no voice, no music",
+      "duration_seconds": 2.0,
+      "path": "assets/audio/candidates/mobius_stableaudio_sfx_v1/hazard_hit__sa_02_seed_43001__electric_snap_thud.wav",
+      "status": "candidate",
+      "source": "stable_audio_3:small-sfx",
+      "seed": 43001,
+      "steps": 4,
+      "cfg": 1.0,
+      "qc": {
+        "peak_dbfs": -0.45,
+        "rms_dbfs": -23.33,
+        "silent_fraction": 0.45,
+        "duration_seconds": 2.0
+      }
+    },
+    {
+      "id": "hazard_hit__sa_02_seed_43002",
+      "slot": "hazard_hit",
+      "variant": 2,
+      "style": "electric snap thud",
+      "kind": "one-shot",
+      "description": "StableAudio SFX: hazard penalty hit, trim best 0.4-1.0s. Prompt: red hazard collision in futuristic magnetic racer, electric snap into heavy low thud, dangerous but clean, dry isolated game sound effect, no voice, no music",
+      "duration_seconds": 2.0,
+      "path": "assets/audio/candidates/mobius_stableaudio_sfx_v1/hazard_hit__sa_02_seed_43002__electric_snap_thud.wav",
+      "status": "candidate",
+      "source": "stable_audio_3:small-sfx",
+      "seed": 43002,
+      "steps": 4,
+      "cfg": 1.0,
+      "qc": {
+        "peak_dbfs": -0.45,
+        "rms_dbfs": -19.09,
+        "silent_fraction": 0.15,
+        "duration_seconds": 2.0
+      }
+    }
+  ]
+}
