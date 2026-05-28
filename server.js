@@ -39,7 +39,7 @@ function json(res, status, data) {
   res.end(JSON.stringify(data));
 }
 function safeLevel(level) {
-  return ['mobius', 'figure8', 'trefoil'].includes(level) ? level : null;
+  return ['diamond', 'mobius', 'figure8', 'trefoil'].includes(level) ? level : null;
 }
 function sanitizeText(value, max = 32) {
   return String(value || '').replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, max);
@@ -50,7 +50,7 @@ function shortHash(value) {
 }
 function loadLeaderboard() {
   try { return JSON.parse(fs.readFileSync(leaderboardFile, 'utf8')); }
-  catch { return { schema: 1, levels: { mobius: [], figure8: [], trefoil: [] } }; }
+  catch { return { schema: 1, levels: { diamond: [], mobius: [], figure8: [], trefoil: [] } }; }
 }
 function saveLeaderboard(board) {
   fs.mkdirSync(dataDir, { recursive: true });
@@ -92,9 +92,10 @@ const server = http.createServer(async (req, res) => {
       const payload = JSON.parse(await readBody(req) || '{}');
       const run = normalizeRunPayload(payload);
       const level = safeLevel(run && (run.level || run.snapshot && run.snapshot.level));
-      if (!level) return json(res, 400, { ok: false, error: 'only mobius, figure8, and trefoil lap runs are supported for the leaderboard right now' });
+      if (!level) return json(res, 400, { ok: false, error: 'unsupported level' });
       const verification = MobiusReplay.verifyRun(run, { maxFrames: Math.round(120 * 300) });
-      if (!verification.pass || verification.summary.finished?.kind !== 'lap') return json(res, 422, { ok: false, buildSha, failures: verification.failures, summary: verification.summary });
+      const expectedKind = level === 'diamond' ? 'coins' : 'lap';
+      if (!verification.pass || verification.summary.finished?.kind !== expectedKind) return json(res, 422, { ok: false, buildSha, failures: verification.failures, summary: verification.summary });
       const finished = verification.summary.finished;
       const board = loadLeaderboard();
       board.levels[level] = board.levels[level] || [];
