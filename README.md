@@ -21,7 +21,7 @@ Then visit `http://localhost:3000`.
 
 - Click cells to toggle Game of Life cells.
 - Run Life / Random Life from the top-right controls.
-- Race Mode uses arrow keys.
+- Race Mode uses arrow keys on desktop and on-screen touch controls on mobile.
 - Orange cells boost, dim cells slow, red cells are hazards.
 
-Desktop browser with WebGL recommended.
+WebGL-capable browser required; desktop keyboard and mobile touch controls are supported.
