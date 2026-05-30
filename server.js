@@ -161,6 +161,7 @@ const server = http.createServer(async (req, res) => {
     if (path.basename(file) === 'index.html') {
       const v = encodeURIComponent(buildSha);
       out = Buffer.from(data.toString('utf8')
+        .replace('<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"}}</script>', '<script type="importmap">{"imports":{"three":"https://esm.sh/three@0.164.1","three/addons/":"https://esm.sh/three@0.164.1/examples/jsm/"}}</script>')
         .replace('<script src="course-core.js"></script>', `<script src="course-core.js?v=${v}"></script>`)
         .replace('<script src="replay-core.js"></script>', `<script>window.__MOBIUS_BUILD_SHA=${JSON.stringify(buildSha)}</script><script src="replay-core.js?v=${v}"></script>`));
     }
