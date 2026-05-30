@@ -8,6 +8,7 @@ const port = process.env.PORT || 3000;
 const root = __dirname;
 const dataDir = process.env.MOBIUS_DATA_DIR || process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(root, '.data');
 const leaderboardFile = path.join(dataDir, 'leaderboard.json');
+const LEADERBOARD_SCHEMA = 2;
 const buildSha = process.env.RAILWAY_GIT_COMMIT_SHA || process.env.GIT_COMMIT_SHA || (() => { try { return execSync('git rev-parse --short HEAD', { cwd: root, stdio: ['ignore','pipe','ignore'] }).toString().trim(); } catch { return 'local-dev'; } })();
 
 const types = {
@@ -48,9 +49,18 @@ function shortHash(value) {
   const crypto = require('crypto');
   return crypto.createHash('sha256').update(String(value)).digest('hex').slice(0, 16);
 }
+function emptyLeaderboard() {
+  return { schema: LEADERBOARD_SCHEMA, levels: { diamond: [], mobius: [], figure8: [], trefoil: [] } };
+}
 function loadLeaderboard() {
-  try { return JSON.parse(fs.readFileSync(leaderboardFile, 'utf8')); }
-  catch { return { schema: 1, levels: { diamond: [], mobius: [], figure8: [], trefoil: [] } }; }
+  try {
+    const board = JSON.parse(fs.readFileSync(leaderboardFile, 'utf8'));
+    if (board.schema !== LEADERBOARD_SCHEMA) return emptyLeaderboard();
+    board.levels = board.levels || {};
+    for (const level of ['diamond', 'mobius', 'figure8', 'trefoil']) board.levels[level] = board.levels[level] || [];
+    return board;
+  }
+  catch { return emptyLeaderboard(); }
 }
 function saveLeaderboard(board) {
   fs.mkdirSync(dataDir, { recursive: true });
