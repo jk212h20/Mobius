@@ -1,0 +1,78 @@
+{
+  "batch": "trippy_house_stableaudio_supertonic_v2_voice_forward",
+  "note": "Remix of v1 with bed lowered, stronger voice, and ducking so words are audible. Includes instrumental A/B references.",
+  "items": [
+    {
+      "id": "mobius_acid_topology__seed_51001__instrumental",
+      "slot": "music_loop",
+      "variant": 1,
+      "style": "acid topology house instrumental A/B reference",
+      "kind": "loop",
+      "description": "Voice balance remix. Tag: \"Mobius. The track folds back into itself.\". Version: instrumental A/B reference.",
+      "duration_seconds": 20.0,
+      "path": "assets/audio/candidates/trippy_house_stableaudio_supertonic_v2_voice_forward/mobius_acid_topology__seed_51001__instrumental.wav",
+      "status": "candidate",
+      "source": "stable_audio_3:local-small-music"
+    },
+    {
+      "id": "mobius_acid_topology__seed_51001__voice_forward_clear",
+      "slot": "music_loop",
+      "variant": 2,
+      "style": "acid topology house voice-forward clear tag",
+      "kind": "loop",
+      "description": "Voice balance remix. Tag: \"Mobius. The track folds back into itself.\". Version: voice-forward clear tag.",
+      "duration_seconds": 20.0,
+      "path": "assets/audio/candidates/trippy_house_stableaudio_supertonic_v2_voice_forward/mobius_acid_topology__seed_51001__voice_forward_clear.wav",
+      "status": "candidate",
+      "source": "stable_audio_3:local-small-music+supertonic-3"
+    },
+    {
+      "id": "mobius_acid_topology__seed_51001__voice_forward_loud",
+      "slot": "music_loop",
+      "variant": 3,
+      "style": "acid topology house voice-forward loud/no-delay tag",
+      "kind": "loop",
+      "description": "Voice balance remix. Tag: \"Mobius. The track folds back into itself.\". Version: voice-forward loud/no-delay tag.",
+      "duration_seconds": 20.0,
+      "path": "assets/audio/candidates/trippy_house_stableaudio_supertonic_v2_voice_forward/mobius_acid_topology__seed_51001__voice_forward_loud.wav",
+      "status": "candidate",
+      "source": "stable_audio_3:local-small-music+supertonic-3"
+    },
+    {
+      "id": "neon_levitation_garage__seed_51001__instrumental",
+      "slot": "music_loop",
+      "variant": 4,
+      "style": "neon levitation garage house instrumental A/B reference",
+      "kind": "loop",
+      "description": "Voice balance remix. Tag: \"Hold the line. Drift through the curve.\". Version: instrumental A/B reference.",
+      "duration_seconds": 20.0,
+      "path": "assets/audio/candidates/trippy_house_stableaudio_supertonic_v2_voice_forward/neon_levitation_garage__seed_51001__instrumental.wav",
+      "status": "candidate",
+      "source": "stable_audio_3:local-small-music"
+    },
+    {
+      "id": "neon_levitation_garage__seed_51001__voice_forward_clear",
+      "slot": "music_loop",
+      "variant": 5,
+      "style": "neon levitation garage house voice-forward clear tag",
+      "kind": "loop",
+      "description": "Voice balance remix. Tag: \"Hold the line. Drift through the curve.\". Version: voice-forward clear tag.",
+      "duration_seconds": 20.0,
+      "path": "assets/audio/candidates/trippy_house_stableaudio_supertonic_v2_voice_forward/neon_levitation_garage__seed_51001__voice_forward_clear.wav",
+      "status": "candidate",
+      "source": "stable_audio_3:local-small-music+supertonic-3"
+    },
+    {
+      "id": "neon_levitation_garage__seed_51001__voice_forward_loud",
+      "slot": "music_loop",
+      "variant": 6,
+      "style": "neon levitation garage house voice-forward loud/no-delay tag",
+      "kind": "loop",
+      "description": "Voice balance remix. Tag: \"Hold the line. Drift through the curve.\". Version: voice-forward loud/no-delay tag.",
+      "duration_seconds": 20.0,
+      "path": "assets/audio/candidates/trippy_house_stableaudio_supertonic_v2_voice_forward/neon_levitation_garage__seed_51001__voice_forward_loud.wav",
+      "status": "candidate",
+      "source": "stable_audio_3:local-small-music+supertonic-3"
+    }
+  ]
+}

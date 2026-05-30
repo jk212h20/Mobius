@@ -1,0 +1,7 @@
+qc_pass,file,duration_seconds,peak_dbfs,rms_dbfs,silent_fraction,active_fraction,clipping_fraction,dc_offset,stereo_imbalance_db,spectral_available,low_energy_fraction_20_160hz,mid_energy_fraction_160_4000hz,high_energy_fraction_4k_16khz,spectral_centroid_hz,spectral_flatness,qc_reasons
+True,/Users/nick/ActiveProjects/Mobius/assets/audio/candidates/trippy_house_inpaint_baked_v1/mobius_acid_topology__seed_51001__gentle_bake.wav,20.0,-1.05,-25.86,0.0325,0.9675,0.0,-9.6e-05,0.62,False,,,,,,
+True,/Users/nick/ActiveProjects/Mobius/assets/audio/candidates/trippy_house_inpaint_baked_v1/mobius_acid_topology__seed_51001__strong_bake.wav,20.0,-1.18,-25.39,0.09,0.91,0.0,-3.9e-05,0.04,False,,,,,,
+True,/Users/nick/ActiveProjects/Mobius/assets/audio/candidates/trippy_house_inpaint_baked_v1/mobius_acid_topology__seed_51001__voice_forward_clear.wav,20.0,-0.47,-27.32,0.035,0.965,0.0,-1.8e-05,0.2,False,,,,,,
+True,/Users/nick/ActiveProjects/Mobius/assets/audio/candidates/trippy_house_inpaint_baked_v1/neon_levitation_garage__seed_51001__gentle_bake.wav,20.0,-1.11,-28.68,0.055,0.945,0.0,-0.000113,0.03,False,,,,,,
+True,/Users/nick/ActiveProjects/Mobius/assets/audio/candidates/trippy_house_inpaint_baked_v1/neon_levitation_garage__seed_51001__strong_bake.wav,20.0,-5.06,-28.7,0.2275,0.7725,0.0,-9.6e-05,0.06,False,,,,,,
+True,/Users/nick/ActiveProjects/Mobius/assets/audio/candidates/trippy_house_inpaint_baked_v1/neon_levitation_garage__seed_51001__voice_forward_clear.wav,20.0,-0.46,-31.2,0.14,0.86,0.0,-4.8e-05,0.04,False,,,,,,

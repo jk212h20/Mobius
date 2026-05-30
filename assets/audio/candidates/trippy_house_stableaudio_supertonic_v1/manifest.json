@@ -1,0 +1,66 @@
+{
+  "batch": "trippy_house_stableaudio_supertonic_v1",
+  "note": "Trippy house candidates generated with StableAudio; alternate versions include short Supertonic spoken tags.",
+  "items": [
+    {
+      "id": "mobius_acid_topology__seed_51001__instrumental",
+      "slot": "music_loop",
+      "variant": 1,
+      "style": "acid topology house instrumental",
+      "kind": "loop",
+      "description": "Trippy house track candidate. StableAudio prompt: trippy instrumental house music loop for a futuristic Mobius strip racing game, 124 BPM, acid bassline, hypnotic topology arpeggios, glassy synth stabs, psychedelic but clean, driving four on the floor groove, no vocals",
+      "duration_seconds": 20.0,
+      "path": "assets/audio/candidates/trippy_house_stableaudio_supertonic_v1/mobius_acid_topology__seed_51001__instrumental.wav",
+      "status": "candidate",
+      "source": "stable_audio_3:local-small-music",
+      "seed": 51001,
+      "steps": 8,
+      "cfg": 1.0
+    },
+    {
+      "id": "mobius_acid_topology__seed_51001__with_voice_tag",
+      "slot": "music_loop",
+      "variant": 2,
+      "style": "acid topology house + Supertonic voice tag",
+      "kind": "loop",
+      "description": "Trippy house track candidate. StableAudio prompt: trippy instrumental house music loop for a futuristic Mobius strip racing game, 124 BPM, acid bassline, hypnotic topology arpeggios, glassy synth stabs, psychedelic but clean, driving four on the floor groove, no vocals Supertonic tag: \"Mobius. The track folds back into itself.\"",
+      "duration_seconds": 20.0,
+      "path": "assets/audio/candidates/trippy_house_stableaudio_supertonic_v1/mobius_acid_topology__seed_51001__with_voice_tag.wav",
+      "status": "candidate",
+      "source": "stable_audio_3:local-small-music+supertonic-3",
+      "seed": 51001,
+      "steps": 8,
+      "cfg": 1.0
+    },
+    {
+      "id": "neon_levitation_garage__seed_51001__instrumental",
+      "slot": "music_loop",
+      "variant": 3,
+      "style": "neon levitation garage house instrumental",
+      "kind": "loop",
+      "description": "Trippy house track candidate. StableAudio prompt: instrumental trippy deep house and UK garage hybrid loop, 126 BPM, anti-gravity racer mood, shuffling hats, warm sub bass, warped neon chords, spacious psychedelic delay, no vocals",
+      "duration_seconds": 20.0,
+      "path": "assets/audio/candidates/trippy_house_stableaudio_supertonic_v1/neon_levitation_garage__seed_51001__instrumental.wav",
+      "status": "candidate",
+      "source": "stable_audio_3:local-small-music",
+      "seed": 51001,
+      "steps": 8,
+      "cfg": 1.0
+    },
+    {
+      "id": "neon_levitation_garage__seed_51001__with_voice_tag",
+      "slot": "music_loop",
+      "variant": 4,
+      "style": "neon levitation garage house + Supertonic voice tag",
+      "kind": "loop",
+      "description": "Trippy house track candidate. StableAudio prompt: instrumental trippy deep house and UK garage hybrid loop, 126 BPM, anti-gravity racer mood, shuffling hats, warm sub bass, warped neon chords, spacious psychedelic delay, no vocals Supertonic tag: \"Hold the line. Drift through the curve.\"",
+      "duration_seconds": 20.0,
+      "path": "assets/audio/candidates/trippy_house_stableaudio_supertonic_v1/neon_levitation_garage__seed_51001__with_voice_tag.wav",
+      "status": "candidate",
+      "source": "stable_audio_3:local-small-music+supertonic-3",
+      "seed": 51001,
+      "steps": 8,
+      "cfg": 1.0
+    }
+  ]
+}
