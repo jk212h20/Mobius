@@ -11,7 +11,7 @@
 <body>
 <div id="loading"><div><strong>LOADING TOPOLOGY RACER</strong><div>Fetching Three.js and building the track…</div><div class="hint">If this stays here, check your internet connection or browser WebGL support.</div></div></div>
 <div id="info"><h1>DIAMOND RING</h1><p id="subtitle">Click cells for Life • Race mode: arrows drive</p></div>
-<div id="lifeControls"><button id="lifeToggle">PAUSE LIFE</button><button id="lifeRandom">RANDOM LIFE</button></div><div id="controls"><button id="rainbowToggle">RAINBOW ROAD</button><select id="levelSelect"><option value="diamond">DIAMOND RING</option><option value="mobius">MÖBIUS STRIP</option><option value="figure8">FIGURE-EIGHT MÖBIUS</option><option value="trefoil">TREFOIL TRACK</option></select><button id="raceToggle">RACE!</button><button id="replayButton">REPLAY</button><button id="helpButton" title="Help">?</button></div>
+<div id="lifeControls"><button id="lifeToggle">PAUSE LIFE</button><button id="lifeRandom">RANDOM LIFE</button></div><div id="controls"><button id="rainbowToggle">RAINBOW ROAD</button><select id="levelSelect"><option value="mobius">MÖBIUS STRIP</option><option value="figure8">FIGURE-EIGHT MÖBIUS</option><option value="trefoil">TREFOIL TRACK</option></select><button id="raceToggle">RACE!</button><button id="replayButton">REPLAY</button><button id="helpButton" title="Help">?</button></div>
 <div id="replayPanel"><div><strong>PASTE RUN / INPUTS-ONLY JSON</strong></div><textarea id="replayText" spellcheck="false" placeholder="Paste COPY CLAIM or COPY INPUTS ONLY JSON here"></textarea><div class="row"><button id="replayPlay">PLAY FROM START</button><button id="replayPause">PAUSE</button><button id="replayClose">CLOSE</button></div><div id="replayStatus">Paste an old run, then PLAY FROM START to reset the grid/phase/pose and replay it visually.</div></div>
 <div id="identityPanel"><h3>TOP 10 RUN</h3><p>This verified run qualifies for the global chart. Optional: attach the name and prize address you want shown with this score.</p><label for="identityHandle">NAME / HANDLE</label><input id="identityHandle" maxlength="24" autocomplete="nickname" placeholder="ANON"><label for="identityAddress">PRIZE ADDRESS</label><input id="identityAddress" maxlength="96" autocomplete="off" placeholder="optional"><div class="row"><button id="identitySave">SAVE SCORE</button><button id="identityAnon">SAVE ANON</button><button id="identityCancel">CANCEL</button></div></div>
 <div id="lapHud"><button id="lapHudCollapse" class="hudCollapse" title="Collapse lap timer">−</button><div id="lapTime">0.000</div><div class="label">LAP TIME</div></div>
@@ -40,7 +40,10 @@ import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 
 const DEFAULT_LEVEL='mobius';
-const LEVEL_PARAM=new URLSearchParams(location.search).get('level')||DEFAULT_LEVEL;
+let LEVEL_PARAM=new URLSearchParams(location.search).get('level')||DEFAULT_LEVEL;
+// Diamond Ring is temporarily hidden (seam work in progress). Allow it only when
+// explicitly opted in via ?level=diamond&allowDiamond=1 for local testing.
+if((LEVEL_PARAM==='diamond'||LEVEL_PARAM==='simpleloop')&&!new URLSearchParams(location.search).has('allowDiamond'))LEVEL_PARAM=DEFAULT_LEVEL;
 const LEVEL=LEVEL_PARAM==='simpleloop'?'diamond':LEVEL_PARAM;
 const LEVEL_TITLES={diamond:'DIAMOND RING',mobius:'MÖBIUS STRIP',figure8:'FIGURE-EIGHT MÖBIUS',trefoil:'TREFOIL TRACK'};
 const COURSE_CORE_LEVELS=new Set(['mobius','figure8','trefoil','diamond']);
