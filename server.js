@@ -159,11 +159,17 @@ const server = http.createServer(async (req, res) => {
     }
     let out = data;
     if (path.basename(file) === 'index.html') {
-      out = Buffer.from(data.toString('utf8').replace('<script src="replay-core.js"></script>', `<script>window.__MOBIUS_BUILD_SHA=${JSON.stringify(buildSha)}</script><script src="replay-core.js"></script>`));
+      const v = encodeURIComponent(buildSha);
+      out = Buffer.from(data.toString('utf8')
+        .replace('<script src="course-core.js"></script>', `<script src="course-core.js?v=${v}"></script>`)
+        .replace('<script src="replay-core.js"></script>', `<script>window.__MOBIUS_BUILD_SHA=${JSON.stringify(buildSha)}</script><script src="replay-core.js?v=${v}"></script>`));
     }
+    const ext = path.extname(file);
+    const isHtml = path.basename(file) === 'index.html';
+    const isImmutableAsset = ['.js', '.css', '.png', '.jpg', '.svg'].includes(ext);
     res.writeHead(200, {
-      'content-type': types[path.extname(file)] || 'application/octet-stream',
-      'cache-control': path.basename(file) === 'index.html' ? 'no-cache' : 'public, max-age=60'
+      'content-type': types[ext] || 'application/octet-stream',
+      'cache-control': isHtml ? 'no-cache' : (isImmutableAsset ? 'public, max-age=31536000, immutable' : 'public, max-age=3600')
     });
     res.end(out);
   });
