@@ -105,7 +105,9 @@ const server = http.createServer(async (req, res) => {
       if (!level) return json(res, 400, { ok: false, error: 'unsupported level' });
       const verification = MobiusReplay.verifyRun(run, { maxFrames: Math.round(120 * 300) });
       const expectedKind = level === 'diamond' ? 'coins' : 'lap';
-      if (!verification.pass || verification.summary.finished?.kind !== expectedKind) return json(res, 422, { ok: false, buildSha, failures: verification.failures, summary: verification.summary });
+      const failures = verification.failures || [];
+      const timeOnlyMismatch = failures.length > 0 && failures.every(f => /^time mismatch /.test(f));
+      if ((!verification.pass && !timeOnlyMismatch) || verification.summary.finished?.kind !== expectedKind) return json(res, 422, { ok: false, buildSha, failures, summary: verification.summary });
       const finished = verification.summary.finished;
       const board = loadLeaderboard();
       board.levels[level] = board.levels[level] || [];
@@ -113,6 +115,7 @@ const server = http.createServer(async (req, res) => {
       const address = sanitizeText(payload.address || run.address || '', 96);
       const id = shortHash(JSON.stringify({ level, snapshot: run.snapshot, inputs: run.inputs, finished }));
       const storedRun = JSON.parse(JSON.stringify(run));
+      storedRun.finished = { ...(storedRun.finished || {}), kind: finished.kind, time: finished.time, frame: finished.frame, worldHashEnd: verification.summary.endHash || storedRun.finished?.worldHashEnd };
       const entry = { id, level, time: finished.time, frame: finished.frame, inputs: (run.inputs || []).length, handle, address, submittedAt: new Date().toISOString(), buildSha: run.buildSha || run.snapshot?.buildSha || buildSha, run: storedRun };
       const existing = board.levels[level].findIndex(e => e.id === id);
       if (existing >= 0) board.levels[level][existing] = { ...board.levels[level][existing], ...entry };
