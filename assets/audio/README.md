@@ -4,7 +4,9 @@ Runtime audio now has procedural placeholders, so the game works before generate
 
 Future generated/edited assets should use these slot names. Ship matching `.ogg` and `.mp3` files for each runtime asset so mobile browsers use the same sound system as desktop instead of falling back to procedural tones when Ogg decoding is unavailable.
 
-- `music_loop.ogg` / `music_loop.mp3` — 45–90s background loop
+- `music_loop.ogg` / `music_loop.mp3` — default background loop
+- `music_loop_figure8.ogg` / `music_loop_figure8.mp3` — Figure-Eight level loop, from `acid_rail_chase` candidate
+- `music_loop_trefoil.ogg` / `music_loop_trefoil.mp3` — Trefoil level loop, from `breakbeat_gravity_flip` candidate
 - `turn_air_loop.ogg` / `turn_air_loop.mp3` — 1–3s steering/lateral motion loop
 - `brake_loop.ogg` / `brake_loop.mp3` — 1–2s magnetic braking loop
 - `rail_scrape_loop.ogg` / `rail_scrape_loop.mp3` — 1–2s rail scrape loop

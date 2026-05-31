@@ -27,12 +27,19 @@ NEGATIVE = (
     'vocals, speech, lyrics, singing, famous song, copyright, harsh noise, clipping, '
     'silence, dubstep wobble, orchestral, rock guitars, excessive cymbals, annoying siren'
 )
-PROMPTS = [
+SIMILAR_PROMPTS = [
     ('neon_acid_pursuit', 'same vibe as the reference loop: trippy instrumental racing house loop, 124 BPM, acid bassline, hypnotic arpeggios, clean four on the floor drive, neon Mobius strip racing energy, game-ready mix, no vocals'),
     ('glass_tunnel_groove', 'similar to the reference loop: psychedelic instrumental house racing music, 124 BPM, glassy synth stabs, rubbery bass, tight kick, light percussion, futuristic tunnel motion, loopable, no vocals'),
     ('magnetic_filter_run', 'similar but different from the reference loop: instrumental filter house loop for anti-gravity racing, 124 BPM, magnetic pulsing bass, shimmering topology synths, sidechained pads, clean minimal arrangement, no vocals'),
     ('folded_acid_night', 'same family as the reference loop: dark neon acid house racing loop, 124 BPM, rolling bassline, folded Mobius arps, crisp hats, psychedelic but not cluttered, seamless game music, no vocals'),
     ('chromatic_drift_house', 'similar to the current Mobius racing music: instrumental chromatic deep acid house loop, 124 BPM, driving groove, warm sub, sparkling synth echoes, racing momentum, loopable, no vocals'),
+]
+DIVERSE_PROMPTS = [
+    ('acid_rail_chase', 'distinct acid techno racing loop, 126 BPM, squelchy 303 bassline, sharp electronic drums, tense anti-gravity chase energy, sparse hypnotic hooks, loopable game music, instrumental, no vocals'),
+    ('synthwave_night_drive', 'distinct neon synthwave racing loop, 122 BPM, retro analog bass, bright arpeggiated lead, gated pads, punchy electronic drums, cinematic night highway momentum, loopable, instrumental, no vocals'),
+    ('breakbeat_gravity_flip', 'distinct futuristic breakbeat racing loop, 132 BPM, syncopated drums, deep sub bass, chopped glassy synth stabs, fast topology tunnel motion, clean game-ready mix, loopable, instrumental, no vocals'),
+    ('minimal_motorik_pulse', 'distinct minimal motorik techno racing loop, 124 BPM, driving pulse bass, ticking percussion, pulsing filter sweeps, sleek mechanical groove, less melodic and more propulsive, loopable, instrumental, no vocals'),
+    ('bright_electro_boost', 'distinct bright electro house racing loop, 128 BPM, bouncy bass, sparkling chord hits, energetic handclaps and hats, arcade boost pad feeling, upbeat but not cheesy, loopable, instrumental, no vocals'),
 ]
 
 
@@ -103,6 +110,8 @@ def main():
     ap.add_argument('--cfg', type=float, default=1.05)
     ap.add_argument('--init-noise-level', type=float, default=0.34)
     ap.add_argument('--seed', type=int, default=83001)
+    ap.add_argument('--prompt-set', choices=['similar','diverse'], default='similar')
+    ap.add_argument('--no-init-audio', action='store_true', help='Generate from text only instead of anchoring to current music_loop.')
     args = ap.parse_args()
 
     if args.model == 'local-small-music':
@@ -117,10 +126,11 @@ def main():
     model = StableAudioModel.from_pretrained(args.model, model_half=False)
     sr = int(model.model_config.get('sample_rate', 44100))
     print(f'loaded in {time.time()-t0:.1f}s device={model.device} sr={sr}', flush=True)
-    init = loop_segment(resample_np(music, music_sr, sr), sr, args.duration) * 0.82
+    init = None if args.no_init_audio else loop_segment(resample_np(music, music_sr, sr), sr, args.duration) * 0.82
+    prompts = DIVERSE_PROMPTS if args.prompt_set == 'diverse' else SIMILAR_PROMPTS
 
     items = []
-    for i, (stem, prompt) in enumerate(PROMPTS, start=1):
+    for i, (stem, prompt) in enumerate(prompts, start=1):
         seed = args.seed + i * 137
         print(f'[{i}/5] generating {stem} seed={seed}', flush=True)
         result = model.generate(
@@ -130,7 +140,7 @@ def main():
             steps=args.steps,
             cfg_scale=args.cfg,
             seed=seed,
-            init_audio=(sr, torch.from_numpy(init)),
+            init_audio=None if init is None else (sr, torch.from_numpy(init)),
             init_noise_level=args.init_noise_level,
         )
         wav = out / f'{i:02d}_{stem}.wav'
@@ -149,14 +159,15 @@ def main():
             'path': str(ogg.relative_to(MOBIUS)),
             'mp3_path': str(mp3.relative_to(MOBIUS)),
             'wav_path': str(wav.relative_to(MOBIUS)),
-            'source': f'stable_audio_3:{args.model} init_audio=current music_loop',
+            'source': f'stable_audio_3:{args.model} ' + ('text_only' if init is None else 'init_audio=current music_loop'),
             'seed': seed,
             'steps': args.steps,
             'cfg': args.cfg,
-            'init_noise_level': args.init_noise_level,
+            'init_noise_level': None if init is None else args.init_noise_level,
             'status': 'candidate',
         })
-        (out / 'manifest.json').write_text(json.dumps({'batch': args.batch, 'note': 'Five alternate Mobius racing music loops similar to current music_loop.', 'items': items}, indent=2))
+        note = 'Five more varied Mobius racing music loops.' if args.prompt_set == 'diverse' else 'Five alternate Mobius racing music loops similar to current music_loop.'
+        (out / 'manifest.json').write_text(json.dumps({'batch': args.batch, 'note': note, 'items': items}, indent=2))
         (MOBIUS / 'assets/audio/review_manifest.json').write_text((out / 'manifest.json').read_text())
     print(f'wrote {len(items)} candidates to {out}', flush=True)
 
