@@ -169,7 +169,7 @@ const server = http.createServer(async (req, res) => {
         .replace('<script src="replay-core.js"></script>', `<script>window.__MOBIUS_BUILD_SHA=${JSON.stringify(buildSha)}</script><script src="replay-core.js?v=${v}"></script>`));
     }
     const ext = path.extname(file);
-    const isHtml = path.basename(file) === 'index.html';
+    const isHtml = ext === '.html';
     const isImmutableAsset = ['.js', '.css', '.png', '.jpg', '.svg'].includes(ext);
     res.writeHead(200, {
       'content-type': types[ext] || 'application/octet-stream',

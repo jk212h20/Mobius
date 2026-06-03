@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Klein Geometry Study</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{overflow:hidden;background:#03040a;color:#dbe7ff;font-family:system-ui,Segoe UI,sans-serif}#canvas{display:block;width:100vw;height:100vh}#hud{position:fixed;left:18px;top:16px;z-index:10;max-width:560px;padding:14px 16px;border:1px solid rgba(88,190,255,.28);border-radius:16px;background:rgba(4,8,18,.68);backdrop-filter:blur(10px);box-shadow:0 0 28px rgba(70,160,255,.13)}h1{font-size:18px;font-weight:400;letter-spacing:3px;color:#69d6ff;margin-bottom:7px}p{font-size:12px;line-height:1.45;color:#abc3dc}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#e9f5ff}#readout{margin-top:10px;display:grid;grid-template-columns:auto auto;gap:4px 14px;font-size:12px;color:#cfe6ff}.k{color:#7f9db8}.v{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#fff}#help{position:fixed;right:18px;bottom:16px;z-index:10;padding:12px 14px;border:1px solid rgba(255,180,80,.25);border-radius:16px;background:rgba(13,8,3,.64);color:#ffd9a0;font-size:12px;line-height:1.55;backdrop-filter:blur(10px)}#designer{position:fixed;right:18px;top:16px;z-index:11;width:300px;padding:12px 14px;border:1px solid rgba(120,255,210,.25);border-radius:16px;background:rgba(3,18,14,.64);backdrop-filter:blur(10px);color:#c9ffee;font-size:12px}#designer h2{font-size:12px;letter-spacing:2px;font-weight:500;color:#7dffd8;margin-bottom:8px}.slider{display:grid;grid-template-columns:112px 1fr 38px;gap:8px;align-items:center;margin:5px 0}.slider label{color:#9cc}.slider input{width:100%}.slider output{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#fff;text-align:right}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"}}</script>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="hud"><h1>KLEIN GEOMETRY STUDY</h1><p>Default view is a <b>single local 4D tangent patch</b>: no fake reachable lower layer, no projected self-intersection collision. The car state lives on <span class="mono">(u,v+2π)~(u,v)</span>, <span class="mono">(u+2π,v)~(u,-v)</span>.</p><div id="readout"></div></div>
+<div id="designer"><h2>DESIGNER VIEW</h2><div id="sliders"></div></div>
+<div id="help">W/↑ accelerate · S/↓ brake<br>A/D or ←/→ steer freely on the surface<br>G global projection/inspection · C orbit in global<br>R reset · <span id="status">loading…</span></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const TAU=Math.PI*2, R=3.05, r=1.05;
+const canvas=document.getElementById('canvas');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight); renderer.setClearColor(0x03040a,1);
+const scene=new THREE.Scene(); scene.fog=new THREE.Fog(0x03040a,11,36);
+const camera=new THREE.PerspectiveCamera(66,innerWidth/innerHeight,.02,120);
+const orbit=new OrbitControls(camera,renderer.domElement); orbit.enableDamping=true; orbit.enabled=false;
+const statusEl=document.getElementById('status'); const readout=document.getElementById('readout');
+function setStatus(s){statusEl.textContent=s}
+scene.add(new THREE.HemisphereLight(0xc7ecff,0x10131f,1.8));
+const sun=new THREE.DirectionalLight(0xffffff,2.2); sun.position.set(4,-6,7); scene.add(sun);
+const fill=new THREE.DirectionalLight(0x4faaff,.65); fill.position.set(-5,4,-3); scene.add(fill);
+
+function mod(x,m){return ((x%m)+m)%m}
+function wrapPi(x){return mod(x+Math.PI,TAU)-Math.PI}
+function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
+function v4(x=0,y=0,z=0,w=0){return{x,y,z,w}}
+function add4(a,b){return v4(a.x+b.x,a.y+b.y,a.z+b.z,a.w+b.w)}
+function sub4(a,b){return v4(a.x-b.x,a.y-b.y,a.z-b.z,a.w-b.w)}
+function mul4(a,s){return v4(a.x*s,a.y*s,a.z*s,a.w*s)}
+function dot4(a,b){return a.x*b.x+a.y*b.y+a.z*b.z+a.w*b.w}
+function len4(a){return Math.sqrt(dot4(a,a))}
+function norm4(a){const l=len4(a); return l>1e-12?mul4(a,1/l):v4(0,0,0,0)}
+function addScaled4(a,b,s){return v4(a.x+b.x*s,a.y+b.y*s,a.z+b.z*s,a.w+b.w*s)}
+function orthogonalize4(seed, basis){let q={...seed}; for(const b of basis)q=addScaled4(q,b,-dot4(q,b)); return norm4(q)}
+function embed4(u,v){return v4((R+r*Math.cos(v))*Math.cos(u),(R+r*Math.cos(v))*Math.sin(u),r*Math.sin(v)*Math.cos(u/2),r*Math.sin(v)*Math.sin(u/2))}
+function derivs4(u,v){const e=.0008,p=embed4(u,v),du=mul4(sub4(embed4(u+e,v),embed4(u-e,v)),1/(2*e)),dv=mul4(sub4(embed4(u,v+e),embed4(u,v-e)),1/(2*e)); return {p,du,dv}}
+function frame4(u,v,heading){
+  const d=derivs4(u,v);
+  const eu=norm4(d.du);
+  const ev=orthogonalize4(d.dv,[eu]);
+  const forward=norm4(addScaled4(mul4(eu,Math.cos(heading)),ev,Math.sin(heading)));
+  const lateral=norm4(addScaled4(mul4(eu,-Math.sin(heading)),ev,Math.cos(heading)));
+  let up=orthogonalize4(v4(0,0,1,0),[forward,lateral]);
+  if(len4(up)<.5)up=orthogonalize4(v4(0,1,0,0),[forward,lateral]);
+  let hyper=orthogonalize4(v4(0,0,0,1),[forward,lateral,up]);
+  if(len4(hyper)<.5)hyper=orthogonalize4(v4(1,0,0,0),[forward,lateral,up]);
+  return {p:d.p,du:d.du,dv:d.dv,eu,ev,forward,lateral,up,hyper,guu:dot4(d.du,d.du),gvv:dot4(d.dv,d.dv)};
+}
+function globalProject4(p){const a=.72, ca=Math.cos(a), sa=Math.sin(a); const z=p.z*ca-p.w*sa,w=p.z*sa+p.w*ca,d=6.4,k=d/(d-w); return new THREE.Vector3(p.x*k,p.y*k,z*k)}
+function areaCode(u,v){
+  // Visual code of the actual Klein point, not of a particular chart.
+  // It is built only from the 4D embedded point p, so identical Klein points
+  // get identical color/brightness under both identifications.
+  const p=embed4(u,v);
+  const base=mod(Math.atan2(p.y,p.x)/TAU,1);
+  const band1=.5+.5*Math.sin(1.7*p.x+2.1*p.y+3.4*p.z+4.2*p.w);
+  const band2=.5+.5*Math.sin(3.3*p.x-1.4*p.y+2.6*p.z-3.8*p.w);
+  const band3=.5+.5*Math.cos(2.2*p.x+3.1*p.y-4.1*p.z+1.9*p.w);
+  return {base,band1,band2,band3,p};
+}
+function colorFor(u,v){
+  const a=areaCode(u,v);
+  const hue=mod(a.base+.11*(a.band2-.5),1);
+  const sat=.50+.42*a.band1;
+  const light=.30+.30*a.band3+.10*a.band2;
+  return new THREE.Color().setHSL(hue,sat,clamp(light,.24,.78));
+}
+
+const params={localRadius:7.2,ghostRadius:15.5,ghostOpacity:0,ghostDrop:.95,hyperScale:.30,checkerU:4,checkerV:6,cameraBack:4.2,cameraUp:2.15,lifeRate:2.2};
+const sliderSpecs=[
+  ['localRadius','local radius',3,11,.1],['ghostRadius','ghost radius',6,24,.2],['ghostOpacity','ghost opacity',0,.75,.01],['ghostDrop','ghost down',0,2.5,.05],['hyperScale','hyper depth',0,.9,.02],['checkerU','cell U scale',1,10,.25],['checkerV','cell V scale',1,12,.25],['lifeRate','life/sec',0,8,.1],['cameraBack','camera back',2,8,.1],['cameraUp','camera up',.7,4,.05]
+];
+function buildSliders(){const box=document.getElementById('sliders'); box.innerHTML=''; for(const [key,label,min,max,step] of sliderSpecs){const row=document.createElement('div'); row.className='slider'; const lab=document.createElement('label'); lab.textContent=label; const input=document.createElement('input'); input.type='range'; input.min=min; input.max=max; input.step=step; input.value=params[key]; const out=document.createElement('output'); out.textContent=Number(params[key]).toFixed(step<.1?2:1); input.addEventListener('input',()=>{params[key]=Number(input.value); out.textContent=Number(params[key]).toFixed(step<.1?2:1); ghostMat.opacity=ghostBackMat.opacity=params.ghostOpacity; ghostMesh.visible=ghostBackMesh.visible=params.ghostOpacity>.001;}); row.append(lab,input,out); box.appendChild(row);}}
+buildSliders();
+
+const globalGroup=new THREE.Group(); scene.add(globalGroup);
+function buildGlobalSurface(){
+  const Nu=160,Nv=54, verts=[], cols=[], inds=[];
+  for(let i=0;i<Nu;i++)for(let j=0;j<Nv;j++){const u=i/Nu*TAU*2, v=(j/Nv-.5)*TAU, q=globalProject4(embed4(u,v)); verts.push(q.x,q.y,q.z); const c=colorFor(u,v); cols.push(c.r,c.g,c.b)}
+  const idx=(i,j)=>mod(i,Nu)*Nv+mod(j,Nv);
+  for(let i=0;i<Nu;i++)for(let j=0;j<Nv;j++){const a=idx(i,j),b=idx(i+1,j),c=idx(i+1,j+1),d=idx(i,j+1); inds.push(a,b,d,b,c,d)}
+  const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3)); geo.setAttribute('color',new THREE.Float32BufferAttribute(cols,3)); geo.setIndex(inds); geo.computeVertexNormals();
+  globalGroup.add(new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.74,side:THREE.DoubleSide,transparent:true,opacity:.55})));
+  globalGroup.add(new THREE.LineSegments(new THREE.WireframeGeometry(geo),new THREE.LineBasicMaterial({color:0x9ee8ff,transparent:true,opacity:.07})));
+}
+buildGlobalSurface(); globalGroup.visible=false;
+
+const localGroup=new THREE.Group(); scene.add(localGroup);
+const localNu=86, localNv=62, ghostNu=96, ghostNv=70;
+const localGeo=new THREE.BufferGeometry();
+function initLocalGeometry(){
+  const verts=[],cols=[],inds=[];
+  for(let i=0;i<=localNu;i++)for(let j=0;j<=localNv;j++){
+    const x=(i/localNu*2-1)*params.localRadius, y=(j/localNv*2-1)*params.localRadius;
+    verts.push(x,y,0); cols.push(.18+.55*i/localNu,.72,.95);
+  }
+  for(let i=0;i<localNu;i++)for(let j=0;j<localNv;j++){const a=i*(localNv+1)+j,b=(i+1)*(localNv+1)+j,c=(i+1)*(localNv+1)+j+1,d=i*(localNv+1)+j+1; inds.push(a,b,d,b,c,d)}
+  localGeo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3)); localGeo.setAttribute('color',new THREE.Float32BufferAttribute(cols,3)); localGeo.setIndex(inds); localGeo.computeVertexNormals(); localGeo.computeBoundingSphere();
+}
+initLocalGeometry();
+const localBackGeo=new THREE.BufferGeometry();
+const localFrontMat=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.FrontSide,transparent:true,opacity:.98,depthWrite:false});
+const localBackMat=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,transparent:true,opacity:.98,depthWrite:false});
+const localMesh=new THREE.Mesh(localGeo,localFrontMat); localGroup.add(localMesh);
+const localBackMesh=new THREE.Mesh(localBackGeo,localBackMat); localGroup.add(localBackMesh);
+const ghostGeo=new THREE.BufferGeometry(), ghostBackGeo=new THREE.BufferGeometry();
+const ghostMat=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.FrontSide,transparent:true,opacity:params.ghostOpacity,depthWrite:false});
+const ghostBackMat=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,transparent:true,opacity:params.ghostOpacity,depthWrite:false});
+const ghostMesh=new THREE.Mesh(ghostGeo,ghostMat); ghostMesh.renderOrder=-2; localGroup.add(ghostMesh);
+const ghostBackMesh=new THREE.Mesh(ghostBackGeo,ghostBackMat); ghostBackMesh.renderOrder=-2; localGroup.add(ghostBackMesh);
+const TILE_U_SCALE=2.8, TILE_V_SCALE=1.05;
+function tileSize(){ return clamp(3/Math.max(.5,params.checkerU),.28,1.8); }
+function metricToParam(S,T){ return {U:S/TILE_U_SCALE, V:T/TILE_V_SCALE}; }
+function hash2(a,b,side=0){let h=(Math.imul(a,374761393)^Math.imul(b,668265263)^Math.imul(side,2246822519))>>>0; h^=h>>>13; h=Math.imul(h,1274126177)>>>0; return (h>>>0)/4294967296;}
+function canonCell(a,b){
+  // Use the true Klein identification. Advancing by 2π in u flips v and swaps sides;
+  // advancing by 4π returns to the same oriented cell. This keeps landmarks tied to
+  // actual bottle regions rather than to the moving local view.
+  const d=lifeDims(), uPeriod=d.cols, vPeriod=d.rows;
+  let q=Math.floor(a/uPeriod);
+  a=((a%uPeriod)+uPeriod)%uPeriod;
+  b=((b%vPeriod)+vPeriod)%vPeriod;
+  let flip=q&1;
+  if(flip) b=((vPeriod-1-b)%vPeriod+vPeriod)%vPeriod;
+  return {a,b,flip};
+}
+let lifeGrid=null, lifeTimer=0, lifeGeneration=0;
+function lifeDims(){const size=tileSize(); return {size,cols:Math.round((TAU*TILE_U_SCALE)/size),rows:Math.round((TAU*TILE_V_SCALE)/size)};}
+function lifeIndex(c,r,rows){return c*rows+r}
+function ensureLifeGrid(){
+  const d=lifeDims();
+  if(lifeGrid&&lifeGrid.cols===d.cols&&lifeGrid.rows===d.rows)return;
+  const cells=new Array(d.cols*d.rows);
+  for(let c=0;c<d.cols;c++)for(let r=0;r<d.rows;r++)cells[lifeIndex(c,r,d.rows)]={frontOn:hash2(c,r,1)>.62,backOn:hash2(c,r,2)>.66};
+  lifeGrid={cols:d.cols,rows:d.rows,cells}; lifeGeneration=0; lifeTimer=0;
+}
+function normLife(c,r,side){
+  ensureLifeGrid(); const cols=lifeGrid.cols, rows=lifeGrid.rows; let flip=false;
+  if(r<0)r+=rows; if(r>=rows)r-=rows;
+  // Klein seam: crossing half the doubled-u period identifies with flipped v and side.
+  if(c<0||c>=cols){c=((c%cols)+cols)%cols; r=rows-1-r; flip=true;}
+  return {c,r,side:flip?(side==='frontOn'?'backOn':'frontOn'):side};
+}
+function getLife(c,r,side){const n=normLife(c,r,side); return !!lifeGrid.cells[lifeIndex(n.c,n.r,lifeGrid.rows)][n.side];}
+function stepLife(){
+  ensureLifeGrid(); const {cols,rows,cells}=lifeGrid; const next=cells.map(()=>({frontOn:false,backOn:false}));
+  for(let c=0;c<cols;c++)for(let r=0;r<rows;r++)for(const side of ['frontOn','backOn']){
+    let count=0; for(let dc=-1;dc<=1;dc++)for(let dr=-1;dr<=1;dr++){if(dc||dr)if(getLife(c+dc,r+dr,side))count++;}
+    const alive=cells[lifeIndex(c,r,rows)][side];
+    next[lifeIndex(c,r,rows)][side]=alive?(count===2||count===3):(count===3);
+  }
+  lifeGrid.cells=next; lifeGeneration++;
+}
+function lifeCell(a,b){
+  ensureLifeGrid(); const c=canonCell(a,b);
+  let cell=lifeGrid.cells[lifeIndex(c.a%lifeGrid.cols,c.b%lifeGrid.rows,lifeGrid.rows)];
+  let front=cell.frontOn, back=cell.backOn;
+  if(c.flip){const t=front; front=back; back=t;}
+  return {frontOn:front,backOn:back};
+}
+function faceColor(cell,front=true,U=0,V=0){
+  // Same two-sided convention as the main levels: on-this-side is green,
+  // on-the-other-side is brown, and both sides on is red from either side.
+  if(cell.frontOn&&cell.backOn)return new THREE.Color(0xd52b2b);
+  const here=front?cell.frontOn:cell.backOn, there=front?cell.backOn:cell.frontOn;
+  if(here)return new THREE.Color(0x30c95a);
+  if(there)return new THREE.Color(0x8a4f25);
+  const off=colorFor(U,V); off.multiplyScalar(.18); off.lerp(new THREE.Color(0x07101b),.55); return off;
+}
+function addTile(verts,cols,inds,corners,color,zLift=0){
+  const base=verts.length/3;
+  for(const q of corners){ verts.push(q.x,q.y,q.z+zLift); cols.push(color.r,color.g,color.b); }
+  inds.push(base,base+1,base+3,base+1,base+2,base+3);
+}
+function localPointFromParam(f,U,V,ghost=false){
+  const gu=Math.sqrt(Math.max(f.guu,.0001)), gv=Math.sqrt(Math.max(f.gvv,.0001));
+  const su=Math.sin(state.heading), cu=Math.cos(state.heading);
+  const A=(U-state.uUnwrapped)*gu, B=(V-state.v)*gv;
+  const x=-su*A + cu*B, y=cu*A + su*B;
+  const p=embed4(U,V), d=sub4(p,f.p);
+  const hyper=dot4(d,f.hyper), up=dot4(d,f.up);
+  const z=ghost ? clamp(up*.16,-1.1,1.1)-params.ghostDrop+hyper*params.hyperScale : clamp(up*.18,-.42,.42);
+  return {x,y,z,U,V,hyper};
+}
+function setGeo(geo,verts,cols,inds){
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));
+  geo.setIndex(inds); geo.computeVertexNormals(); geo.computeBoundingSphere();
+}
+function clearGeo(geo){ setGeo(geo,[],[],[]); }
+function rebuildLifePatch(frontGeo,backGeo,f,radius,wantSolid,ghost=false){
+  const fVerts=[],fCols=[],fInds=[], bVerts=[],bCols=[],bInds=[];
+  const size=tileSize(), S0=state.uUnwrapped*TILE_U_SCALE, T0=state.v*TILE_V_SCALE;
+  const n=Math.ceil(radius/size)+3;
+  const a0=Math.floor(S0/size), b0=Math.floor(T0/size);
+  for(let a=a0-n;a<=a0+n;a++)for(let b=b0-n;b<=b0+n;b++){
+    const life=lifeCell(a,b);
+    const S00=a*size,T00=b*size,S10=(a+1)*size,T11=(b+1)*size;
+    const centerS=(S00+S10)/2, centerT=(T00+T11)/2;
+    if(Math.hypot(centerS-S0,centerT-T0)>radius*1.18) continue;
+    const p00=metricToParam(S00,T00), p10=metricToParam(S10,T00), p11=metricToParam(S10,T11), p01=metricToParam(S00,T11);
+    const corners=[localPointFromParam(f,p00.U,p00.V,ghost),localPointFromParam(f,p10.U,p10.V,ghost),localPointFromParam(f,p11.U,p11.V,ghost),localPointFromParam(f,p01.U,p01.V,ghost)];
+    const U=(p00.U+p10.U+p11.U+p01.U)/4, V=(p00.V+p10.V+p11.V+p01.V)/4;
+    let fc=faceColor(life,true,U,V), bc=faceColor(life,false,U,V);
+    if(ghost){ if(fc)fc.multiplyScalar(.55); if(bc)bc.multiplyScalar(.55); }
+    addTile(fVerts,fCols,fInds,corners,fc,.018);
+    addTile(bVerts,bCols,bInds,corners,bc,-.018);
+  }
+  setGeo(frontGeo,fVerts,fCols,fInds); setGeo(backGeo,bVerts,bCols,bInds);
+}
+
+
+function rebuildLocalPatch(f){ rebuildLifePatch(localGeo, localBackGeo, f, params.localRadius, true, false); }
+function rebuildGhostPatch(f){
+  ghostMesh.visible=ghostBackMesh.visible=params.ghostOpacity>.001;
+  ghostMat.opacity=ghostBackMat.opacity=params.ghostOpacity;
+  if(!ghostMesh.visible){ clearGeo(ghostGeo); clearGeo(ghostBackGeo); return; }
+  rebuildLifePatch(ghostGeo, ghostBackGeo, f, params.ghostRadius, false, true);
+}
+
+
+const car=new THREE.Group(); scene.add(car);
+const body=new THREE.Mesh(new THREE.BoxGeometry(.36,.24,.14),new THREE.MeshStandardMaterial({color:0xfff1c2,emissive:0x3a2200,roughness:.35})); body.position.z=.08; car.add(body);
+const nose=new THREE.Mesh(new THREE.ConeGeometry(.12,.30,24),new THREE.MeshStandardMaterial({color:0xff7d35,emissive:0x381000})); nose.rotation.x=Math.PI/2; nose.position.y=.25; nose.position.z=.08; car.add(nose);
+const marker=new THREE.Mesh(new THREE.TorusGeometry(.55,.018,8,80),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.45})); scene.add(marker);
+
+const keys=new Set(); let globalView=false, orbitGlobal=false;
+addEventListener('keydown',e=>{const k=e.key.toLowerCase(); keys.add(k); if(k==='r')reset(); if(k==='g'){globalView=!globalView; orbit.enabled=globalView&&orbitGlobal; globalGroup.visible=globalView; localGroup.visible=!globalView} if(k==='c'){orbitGlobal=!orbitGlobal; orbit.enabled=globalView&&orbitGlobal}});
+addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
+function down(...ks){return ks.some(k=>keys.has(k))}
+let state={u:.18,v:.65,heading:.08,speed:0,uUnwrapped:.18,baseCircuits:0,fullPeriods:0};
+function reset(){state={u:.18,v:.65,heading:.08,speed:0,uUnwrapped:.18,baseCircuits:0,fullPeriods:0}}
+function update(dt){
+  if(params.lifeRate>0){lifeTimer+=dt*params.lifeRate; while(lifeTimer>=1){stepLife(); lifeTimer-=1;}}
+  const accel=(down('arrowup','w')?1:0)-(down('arrowdown','s')?1:0);
+  const steer=(down('arrowright','d')?1:0)-(down('arrowleft','a')?1:0);
+  state.speed+=accel*7.75*dt; state.speed*=Math.exp(-.34*dt); state.speed=clamp(state.speed,-3.9,9.25);
+  state.heading+=steer*(1.55+.22*Math.abs(state.speed))*dt*Math.sign(state.speed||1);
+  const f=frame4(state.uUnwrapped,state.v,state.heading);
+  const gu=Math.sqrt(Math.max(f.guu,.0001)), gv=Math.sqrt(Math.max(f.gvv,.0001));
+  state.uUnwrapped+=Math.cos(state.heading)*state.speed/gu*dt;
+  state.v+=Math.sin(state.heading)*state.speed/gv*dt;
+  state.u=mod(state.uUnwrapped,TAU*2);
+  state.baseCircuits=Math.floor(state.uUnwrapped/TAU);
+  state.fullPeriods=Math.floor(state.uUnwrapped/(2*TAU));
+}
+function renderScene(){
+  const f=frame4(state.uUnwrapped,state.v,state.heading);
+  if(globalView){
+    const gp=globalProject4(f.p); car.position.copy(gp); car.rotation.set(0,0,0); marker.position.copy(gp); marker.rotation.set(0,0,0);
+    if(!orbit.enabled){camera.position.lerp(gp.clone().add(new THREE.Vector3(0,-7,4)),.06); camera.up.set(0,0,1); camera.lookAt(gp)} else orbit.update();
+  }else{
+    rebuildGhostPatch(f); rebuildLocalPatch(f); car.position.set(0,0,.075); car.rotation.set(0,0,0); marker.position.set(0,0,.015); marker.rotation.set(0,0,0);
+    const desired=new THREE.Vector3(0,-params.cameraBack,params.cameraUp), target=new THREE.Vector3(0,1.05,0);
+    camera.position.lerp(desired,.16); camera.up.lerp(new THREE.Vector3(0,0,1),.12).normalize(); camera.lookAt(target);
+  }
+}
+function updateHud(){readout.innerHTML=`
+  <div class="k">u mod 4π, v mod 2π</div><div class="v">${state.u.toFixed(3)}, ${wrapPi(state.v).toFixed(3)}</div>
+  <div class="k">unwrapped u, v</div><div class="v">${state.uUnwrapped.toFixed(3)}, ${state.v.toFixed(3)}</div>
+  <div class="k">speed</div><div class="v">${state.speed.toFixed(3)}</div>
+  <div class="k">life generation</div><div class="v">${lifeGeneration}</div>
+  <div class="k">base circuits Δu/2π</div><div class="v">${(state.uUnwrapped/TAU).toFixed(3)} (${state.baseCircuits})</div>
+  <div class="k">full Klein periods Δu/4π</div><div class="v">${(state.uUnwrapped/(2*TAU)).toFixed(3)} (${state.fullPeriods})</div>
+  <div class="k">view</div><div class="v">${globalView?'global 3D projection (can self-overlap)':(params.ghostOpacity>.001?'local patch + optional ghost context':'single local patch')}</div>
+  <div class="k">ghost context</div><div class="v">${params.ghostOpacity>.001?'visual only, not a road':'off'}</div>`}
+let last=performance.now();
+function animate(now){requestAnimationFrame(animate); const dt=Math.min(.033,(now-last)/1000); last=now; update(dt); renderScene(); updateHud(); renderer.render(scene,camera)}
+addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix()});
+camera.position.set(0,-params.cameraBack,params.cameraUp); camera.lookAt(0,1.05,0); setStatus('running'); animate(performance.now());
+</script>
+</body>
+</html>
